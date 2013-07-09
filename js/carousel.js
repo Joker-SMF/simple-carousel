@@ -34,21 +34,23 @@
 			ref : this,
 			carouselTimer : 2000,
 			carouselTimeOut : null,
-			automatic : false
+			automatic : false,
+			effect: 'slide'
 		};
 		opts = $.extend({}, defaults, args);
 		return cBrain.init(opts);
 	};
+
 	var cBrain = {
 		args : {},
 		init : function(params) {
 			var defaults = {
-				initCount : null,
-				currCount : 1,
-				direction : 'right'
+				totalElements : null,
+				currElement : 0,
 			}, innerRef = this;
 
 			this.args = $.extend({}, defaults, params);
+
 			this.args.initCount = params.ref.children().length;
 			this.clearCarouselTimer();
 
@@ -65,75 +67,48 @@
 			}).bind('mouseout', function() {
 				innerRef.resumeCarousel();
 			});
-			if(this.args.automatic === true) {
-				this.moveCarouselRight(true);
-			}
-		},
-		moveCarouselLeft : function(autoScroll) {
-			if(this.args.currCount == 1) {
-				this.clearCarouselTimer();
-				this.args.direction = 'right';
-				this.moveCarouselRight(true);
-				return;
-			} else {
-				this.args.direction = 'left';
-				this.args.currCount--;
-				var wid = $(this.args.ref).children().width();
-				var marg = $(this.args.ref).css("margin-left");
-				total = parseInt(marg) + parseInt(wid);
-				$(this.args.ref).animate({
-					'margin-left' : total + "px"
-				}, this.args.carouselTimer);
-			}
 
 			if(this.args.automatic === true) {
-				var e = this;
-				this.clearCarouselTimer();
-				this.args.direction = 'left';
-				this.args.carouselTimeOut = setTimeout(function() {
-					e.moveCarouselLeft(true);
-				}, this.args.carouselTimer);
+				this.showElement();
 			}
 		},
-		moveCarouselRight : function(autoScroll) {
-			if(this.args.currCount >= this.args.initCount) {
-				this.clearCarouselTimer();
-				this.args.direction = 'left';
-				this.moveCarouselLeft(true);
-				return;
-			} else {
-				this.args.direction = 'right';
-				this.args.currCount++;
-				var wid = $(this.args.ref).children().width();
-				var marg = $(this.args.ref).css("margin-left");
-				total = parseInt(marg) - parseInt(wid);
-				$(this.args.ref).animate({
-					'margin-left' : total + "px"
-				}, this.args.carouselTimer);
-			}
 
-			if(this.args.automatic === true) {
-				var e = this;
-				this.args.direction = 'right';
-				this.clearCarouselTimer();
-				this.args.carouselTimeOut = setTimeout(function() {
-					e.moveCarouselRight(true);
-				}, this.args.carouselTimer);
-			}
+		calculateIndex : function (index) {
+			var _this = this;
+			return $(_this.args.ref).find('li').eq(_this.args.currElement);
 		},
-		moveCarousel : function(options) {
-			//if(options.direction) ? options.direction : 'right';
 
+		showElement : function(options) {
+			var i = this.calculateIndex();
+			var _this = this;
+			$(i).addClass('active');
+			$(i).fadeIn(_this.args.carouselTimer, function() {
+				if(_this.args.automatic === true) {
+					_this.hideElement();
+				}
+			});
 		},
+
+		hideElement: function() {
+			var i = this.calculateIndex();
+			var _this = this;
+			$(i).removeClass('active');
+			$(i).fadeOut(_this.args.carouselTimer, function() {
+				_this.args.currElement++;
+				_this.showElement();
+			});
+		},
+
 		pauseCarousel : function() {
 			this.clearCarouselTimer();
 		},
+
 		resumeCarousel : function() {
-			if(this.args.direction === 'left')
-				this.moveCarouselLeft(true);
-			else
-				this.moveCarouselRight();
+			if(this.args.automatic === true) {
+				this.showElement();
+			}
 		},
+
 		clearCarouselTimer : function() {
 			clearTimeout(this.args.carouselTimeOut);
 			this.args.carouselTimeOut = null;

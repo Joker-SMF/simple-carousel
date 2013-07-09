@@ -40,8 +40,9 @@
 		<link media="all" rel="stylesheet" type="text/css" href="css/carousel.css" />
 		<script type="text/javascript">
 			$(window).load(function() {
-				$(".images ul").carousel({
-					'automatic': true
+				$(".carousel").carousel({
+					'automatic': true,
+					'effect': 'fade'
 				});
 			});
 		</script>
@@ -49,34 +50,26 @@
 	</head>
 	<body>
 		<div class="container">
-			<div class="images">
-				<div class="arrowLeft">
-					&lt;
-				</div>
-				<div class="arrowRight">
-					&gt;
-				</div>
-				<ul>
-					<li>
-						<img src="images/1.jpg" />
-					</li>
-					<li>
-						<img src="images/2.jpg" />
-					</li>
-					<li>
-						<img src="images/3.jpg" />
-					</li>
-					<li>
-						<img src="images/4.jpg" />
-					</li>
-					<li>
-						<img src="images/5.jpg" />
-					</li>
-					<li>
-						<img src="images/6.jpg" />
-					</li>
-				</ul>
-			</div>
+			<ul class="carousel">
+				<li>
+					<img src="images/1.jpg" />
+				</li>
+				<li>
+					<img src="images/2.jpg" />
+				</li>
+				<li>
+					<img src="images/3.jpg" />
+				</li>
+				<li>
+					<img src="images/4.jpg" />
+				</li>
+				<li>
+					<img src="images/5.jpg" />
+				</li>
+				<li>
+					<img src="images/6.jpg" />
+				</li>
+			</ul>
 		</div>
 	</body>
 </html>
