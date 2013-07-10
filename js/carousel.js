@@ -33,6 +33,7 @@
 		var defaults = {
 			ref : this,
 			carouselTimer : 2000,
+			sliderTimer: 1000,
 			carouselTimeOut : null,
 			automatic : false,
 			effect: 'slide'
@@ -51,7 +52,6 @@
 			}, innerRef = this;
 
 			this.args = $.extend({}, defaults, params);
-
 			this.args.totalElements = parseInt(params.ref.children().length) - 1;
 
 			$(this.args.ref).parent().find('.arrowLeft').click(function() {
@@ -93,35 +93,40 @@
 			var _this = this;
 			switch(this.args.effect) {
 				case 'fade':
-					_this.fadeInElement();
+					_this.hideElements(_this.fadeInElement.bind(_this));
 					break;
 
 				case 'slide':
-					_this.slideInElement();
+					_this.slideOutElement();
+					break;
 			}
 		},
 
-		slideInElement: function() {
+		hideElements: function(callback) {
 			var _this = this;
-			var i = this.calculateIndex();
-			$(i).addClass('active');
-			$(i).show();
-			setTimeout(function(){
-				_this.slideOutElement();
-			}, 1000);
+			$(_this.args.ref).find('li').each(function(){
+				$(this).css({'display': 'none'});
+			});
+			callback();
 		},
 
 		slideOutElement: function() {
 			var _this = this,
-				i = this.calculateIndex();
-				currentLeft = parseInt($(this.args.ref).css('left'));
-				finalLeft = (this.args.currElement == this.args.totalElements) ? 0 : (isNaN(currentLeft) ? -250 : currentLeft - 250);
+				i = _this.calculateIndex();
 
-			$(this.args.ref).animate({left: finalLeft + "px"}, _this.args.carouselTimer, '', function() {
-				$(i).hide();
-				_this.args.currElement++;
-				_this.slideInElement();
-			});
+			$(_this.args.ref).find('li:last-child').removeClass('active');
+			$(i).addClass('active');
+			$(_this.args.ref).animate({'left' : '-' + $(_this.args.ref).width()/2}, _this.args.sliderTimer, function() {
+				_this.slideInElement();	
+			})
+		},
+
+		slideInElement: function() {
+			var _this = this;
+			$(_this.args.ref).css('left', 0).children(':first').appendTo($(_this.args.ref));
+			setTimeout(function() {
+				_this.slideOutElement();
+			}, _this.args.carouselTimer)
 		},
 
 		fadeInElement : function(options) {
