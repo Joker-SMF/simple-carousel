@@ -47,12 +47,13 @@
 			var defaults = {
 				totalElements : null,
 				currElement : 0,
+				stopCarousel: false
 			}, innerRef = this;
 
 			this.args = $.extend({}, defaults, params);
 
 			this.args.totalElements = parseInt(params.ref.children().length) - 1;
-			this.clearCarouselTimer();
+			//this.clearCarouselTimer();
 
 			$(this.args.ref).parent().find('.arrowLeft').click(function() {
 				innerRef.moveCarouselLeft();
@@ -62,14 +63,18 @@
 				innerRef.moveCarouselRight();
 			});
 
-			$(this.args.ref).bind('mouseover', function() {
+			$(this.args.ref).bind('mouseenter', function() {
+				console.log('mouse enter');
 				innerRef.pauseCarousel();
-			}).bind('mouseout', function() {
+			}).bind('mouseleave', function() {
+				console.log('mouse leave');
 				innerRef.resumeCarousel();
 			});
 
-			if(this.args.automatic === true) {
-				this.showElement();
+			switch(this.args.effect) {
+				case 'fade':
+					innerRef.fadeInElement();
+					break;
 			}
 		},
 
@@ -82,34 +87,37 @@
 			return $(_this.args.ref).find('li').eq(_this.args.currElement);
 		},
 
-		showElement : function(options) {
+		fadeInElement : function(options) {
 			var i = this.calculateIndex();
 			var _this = this;
 			$(i).addClass('active');
 			$(i).fadeIn(_this.args.carouselTimer, function() {
-				if(_this.args.automatic === true) {
-					_this.hideElement();
+				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
+					_this.fadeOutElement();
 				}
 			});
 		},
 
-		hideElement: function() {
+		fadeOutElement: function() {
 			var i = this.calculateIndex();
 			var _this = this;
 			$(i).removeClass('active');
 			$(i).fadeOut(_this.args.carouselTimer, function() {
 				_this.args.currElement++;
-				_this.showElement();
+				_this.fadeInElement();
 			});
 		},
 
 		pauseCarousel : function() {
-			this.clearCarouselTimer();
+			//this.clearCarouselTimer();
+			//debugger;
+			this.args.stopCarousel = true;
 		},
 
 		resumeCarousel : function() {
+			this.args.stopCarousel = false;
 			if(this.args.automatic === true) {
-				this.showElement();
+				this.fadeOutElement();
 			}
 		},
 
