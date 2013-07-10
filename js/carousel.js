@@ -67,11 +67,17 @@
 			}).bind('mouseleave', function() {
 				innerRef.resumeCarousel();
 			});
+			this.chooseEffectFunction();
+		},
 
-			switch(this.args.effect) {
-				case 'fade':
-					innerRef.fadeInElement();
-					break;
+		pauseCarousel : function() {
+			this.args.stopCarousel = true;
+		},
+
+		resumeCarousel : function() {
+			this.args.stopCarousel = false;
+			if(this.args.automatic === true) {
+				if(this.args.effect === 'fade') this.fadeOutElement();
 			}
 		},
 
@@ -81,6 +87,41 @@
 				_this.args.currElement = 0;
 			}
 			return $(_this.args.ref).find('li').eq(_this.args.currElement);
+		},
+
+		chooseEffectFunction : function() {
+			var _this = this;
+			switch(this.args.effect) {
+				case 'fade':
+					_this.fadeInElement();
+					break;
+
+				case 'slide':
+					_this.slideInElement();
+			}
+		},
+
+		slideInElement: function() {
+			var _this = this;
+			var i = this.calculateIndex();
+			$(i).addClass('active');
+			$(i).show();
+			setTimeout(function(){
+				_this.slideOutElement();
+			}, 1000);
+		},
+
+		slideOutElement: function() {
+			var _this = this,
+				i = this.calculateIndex();
+				currentLeft = parseInt($(this.args.ref).css('left'));
+				finalLeft = (this.args.currElement == this.args.totalElements) ? 0 : (isNaN(currentLeft) ? -250 : currentLeft - 250);
+
+			$(this.args.ref).animate({left: finalLeft + "px"}, _this.args.carouselTimer, '', function() {
+				$(i).hide();
+				_this.args.currElement++;
+				_this.slideInElement();
+			});
 		},
 
 		fadeInElement : function(options) {
@@ -102,17 +143,6 @@
 				_this.args.currElement++;
 				_this.fadeInElement();
 			});
-		},
-
-		pauseCarousel : function() {
-			this.args.stopCarousel = true;
-		},
-
-		resumeCarousel : function() {
-			this.args.stopCarousel = false;
-			if(this.args.automatic === true) {
-				this.fadeOutElement();
-			}
 		},
 
 		clearCarouselTimer : function() {
