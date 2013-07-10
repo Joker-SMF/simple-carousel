@@ -51,7 +51,7 @@
 
 			this.args = $.extend({}, defaults, params);
 
-			this.args.initCount = params.ref.children().length;
+			this.args.totalElements = parseInt(params.ref.children().length) - 1;
 			this.clearCarouselTimer();
 
 			$(this.args.ref).parent().find('.arrowLeft').click(function() {
@@ -75,6 +75,10 @@
 
 		calculateIndex : function (index) {
 			var _this = this;
+			if(_this.args.currElement > _this.args.totalElements) {
+				console.log(_this.args.currElement + ' : ' + _this.args.totalElements);
+				_this.args.currElement = 0;
+			}
 			return $(_this.args.ref).find('li').eq(_this.args.currElement);
 		},
 
