@@ -53,7 +53,6 @@
 			this.args = $.extend({}, defaults, params);
 
 			this.args.totalElements = parseInt(params.ref.children().length) - 1;
-			//this.clearCarouselTimer();
 
 			$(this.args.ref).parent().find('.arrowLeft').click(function() {
 				innerRef.moveCarouselLeft();
@@ -64,10 +63,8 @@
 			});
 
 			$(this.args.ref).bind('mouseenter', function() {
-				console.log('mouse enter');
 				innerRef.pauseCarousel();
 			}).bind('mouseleave', function() {
-				console.log('mouse leave');
 				innerRef.resumeCarousel();
 			});
 
@@ -81,7 +78,6 @@
 		calculateIndex : function (index) {
 			var _this = this;
 			if(_this.args.currElement > _this.args.totalElements) {
-				console.log(_this.args.currElement + ' : ' + _this.args.totalElements);
 				_this.args.currElement = 0;
 			}
 			return $(_this.args.ref).find('li').eq(_this.args.currElement);
@@ -109,8 +105,6 @@
 		},
 
 		pauseCarousel : function() {
-			//this.clearCarouselTimer();
-			//debugger;
 			this.args.stopCarousel = true;
 		},
 
