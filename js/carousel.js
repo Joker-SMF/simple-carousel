@@ -86,7 +86,7 @@
 			if(_this.args.currElement > _this.args.totalElements) {
 				_this.args.currElement = 0;
 			}
-			return $(_this.args.ref).find('li').eq(_this.args.currElement);
+			return $(_this.args.ref).find('div').eq(_this.args.currElement);
 		},
 
 		chooseEffectFunction : function() {
@@ -104,7 +104,7 @@
 
 		hideElements: function(callback) {
 			var _this = this;
-			$(_this.args.ref).find('li').each(function(){
+			$(_this.args.ref).find('div').each(function(){
 				$(this).css({'display': 'none'});
 			});
 			callback();
@@ -114,11 +114,13 @@
 			var _this = this,
 				i = _this.calculateIndex();
 
-			$(_this.args.ref).find('li:last-child').removeClass('active');
+
+			$(_this.args.ref).children(':last').removeClass('active');
 			$(i).addClass('active');
-			$(_this.args.ref).animate({'left' : '-' + $(_this.args.ref).width()/2}, _this.args.sliderTimer, function() {
+			$(_this.args.ref).animate({'left' : '-' + $(_this.args.ref).width()}, _this.args.sliderTimer, function() {
 				_this.slideInElement();	
 			})
+
 		},
 
 		slideInElement: function() {
