@@ -30,6 +30,8 @@
 (function() {
 	$.fn.carousel = function(args) {
 		args = args || {};
+		$this = this;
+
 		var defaults = {
 			ref : this,
 			carouselTimer : 2000,
@@ -89,6 +91,11 @@
 			return $(_this.args.ref).find('div').eq(_this.args.currElement);
 		},
 
+		clearCarouselTimer : function() {
+			clearTimeout(this.args.carouselTimeOut);
+			this.args.carouselTimeOut = null;
+		},
+
 		chooseEffectFunction : function() {
 			var _this = this;
 			switch(this.args.effect) {
@@ -97,7 +104,11 @@
 					break;
 
 				case 'slide':
-					_this.slideOutElement();
+					if(_this.args.automatic === true)
+						_this.hideElements(_this.newFunc.bind(_this));
+					break;
+
+				default:
 					break;
 			}
 		},
@@ -110,25 +121,29 @@
 			callback();
 		},
 
-		slideOutElement: function() {
+		newFunc : function() {
 			var _this = this,
-				i = _this.calculateIndex();
+				i = this.calculateIndex()
+				$active_ele = $(_this.args.ref).find('.active');
 
+			if(!$(i).hasClass('.active')) {
+				$active_ele.animate({
+                    left: -($active_ele.width())
+                }, 500, '', function(){
+	                $active_ele.removeClass('active');
+                });
 
-			$(_this.args.ref).children(':last').removeClass('active');
-			$(i).addClass('active');
-			$(_this.args.ref).animate({'left' : '-' + $(_this.args.ref).width()}, _this.args.sliderTimer, function() {
-				_this.slideInElement();	
-			})
-
-		},
-
-		slideInElement: function() {
-			var _this = this;
-			$(_this.args.ref).css('left', 0).children(':first').appendTo($(_this.args.ref));
-			setTimeout(function() {
-				_this.slideOutElement();
-			}, _this.args.carouselTimer)
+				$(i).addClass('active').show().css({
+	                left: $(i).width()
+	            }).animate({
+	                left: 0
+	            }, 500, '', function() {
+		            setTimeout(function() {
+			            _this.args.currElement++;
+			            _this.newFunc();
+		            }, 1000);
+	            });
+            }
 		},
 
 		fadeInElement : function(options) {
@@ -156,5 +171,6 @@
 			clearTimeout(this.args.carouselTimeOut);
 			this.args.carouselTimeOut = null;
 		}
+
 	};
 })();
