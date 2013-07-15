@@ -35,7 +35,7 @@
 		var defaults = {
 			ref : this,
 			carouselTimer : 2000,
-			sliderTimer: 1000,
+			effectTimer: 1000,
 			carouselTimeOut : null,
 			automatic : false,
 			effect: 'slide'
@@ -50,26 +50,43 @@
 			var defaults = {
 				totalElements : null,
 				currElement : 0,
-				stopCarousel: false
-			}, innerRef = this;
+				stopCarousel: false,
+				childNodeName: null,
+			};
 
 			this.args = $.extend({}, defaults, params);
-			this.args.totalElements = parseInt(params.ref.children().length) - 1;
+			this.makeInitialCheck();
+		},
 
-			$(this.args.ref).parent().find('.arrowLeft').click(function() {
-				innerRef.moveCarouselLeft();
+		makeInitialCheck: function() {
+			var _this = this,
+				diffChild = false;
+
+			_this.args.childNodeName = $(_this.args.ref).children().get(0).tagName.toLowerCase()
+			$(_this.args.ref).children().each(function() {
+				if(_this.args.childNodeName !== this.tagName.toLowerCase()) diffChild = true
 			});
 
-			$(this.args.ref).parent().find('.arrowRight').click(function() {
-				innerRef.moveCarouselRight();
+			if(diffChild === true) {
+				return false;
+			}
+
+			_this.args.totalElements = parseInt(_this.args.ref.children().length) - 1;
+
+			$(_this.args.ref).parent().find('.arrowLeft').click(function() {
+				_this.moveCarouselLeft();
 			});
 
-			$(this.args.ref).bind('mouseenter', function() {
-				innerRef.pauseCarousel();
+			$(_this.args.ref).parent().find('.arrowRight').click(function() {
+				_this.moveCarouselRight();
+			});
+
+			$(_this.args.ref).bind('mouseenter', function() {
+				_this.pauseCarousel();
 			}).bind('mouseleave', function() {
-				innerRef.resumeCarousel();
+				_this.resumeCarousel();
 			});
-			this.chooseEffectFunction();
+			_this.chooseEffectFunction();
 		},
 
 		pauseCarousel : function() {
@@ -83,12 +100,24 @@
 			}
 		},
 
+		hideElements: function(callback) {
+			var _this = this;
+			$(_this.args.ref).find(_this.args.childNodeName).not(':first-child').hide();
+			$(_this.args.ref).find(_this.args.childNodeName + ':first').addClass('active');
+			callback();
+		},
+
 		calculateIndex : function (index) {
 			var _this = this;
 			if(_this.args.currElement > _this.args.totalElements) {
 				_this.args.currElement = 0;
 			}
-			return $(_this.args.ref).find('div').eq(_this.args.currElement);
+			return $(_this.args.ref).find(_this.args.childNodeName).eq(_this.args.currElement);
+		},
+
+		findActiveElement: function() {
+			var _this = this;
+			return $(_this.args.ref).find('.active');
 		},
 
 		clearCarouselTimer : function() {
@@ -104,8 +133,13 @@
 					break;
 
 				case 'slide':
-					if(_this.args.automatic === true)
-						_this.hideElements(_this.newFunc.bind(_this));
+					_this.args.currElement = 1;
+					_this.hideElements(function() {
+						if(_this.args.automatic === true) 
+							_this.args.carouselTimeOut = setTimeout(function() {
+								_this.slideInOut();
+							}, _this.args.carouselTimer);
+					});
 					break;
 
 				default:
@@ -113,44 +147,38 @@
 			}
 		},
 
-		hideElements: function(callback) {
-			var _this = this;
-			$(_this.args.ref).find('div').each(function(){
-				$(this).css({'display': 'none'});
-			});
-			callback();
-		},
-
-		newFunc : function() {
+		slideInOut : function() {
 			var _this = this,
-				i = this.calculateIndex()
-				$active_ele = $(_this.args.ref).find('.active');
+				i = this.calculateIndex(),
+				active_ele = this.findActiveElement();
 
-			if(!$(i).hasClass('.active')) {
-				$active_ele.animate({
-                    left: -($active_ele.width())
-                }, 500, '', function(){
-	                $active_ele.removeClass('active');
-                });
+			if(active_ele.length > 0) {
+				$(active_ele).animate({
+	                left: -($(active_ele).width())
+	            }, _this.args.effectTimer, '', function(){
+	                $(active_ele).removeClass('active');
+	            });
+			}
 
+			if(_this.args.automatic === true) {
 				$(i).addClass('active').show().css({
 	                left: $(i).width()
 	            }).animate({
 	                left: 0
-	            }, 500, '', function() {
-		            setTimeout(function() {
+	            }, _this.args.effectTimer, '', function() {
+		            _this.args.carouselTimeOut = setTimeout(function() {
 			            _this.args.currElement++;
-			            _this.newFunc();
-		            }, 1000);
+			            _this.slideInOut();
+		            }, _this.args.carouselTimer);
 	            });
-            }
+			}
 		},
 
 		fadeInElement : function(options) {
 			var i = this.calculateIndex();
 			var _this = this;
 			$(i).addClass('active');
-			$(i).fadeIn(_this.args.carouselTimer, function() {
+			$(i).fadeIn(_this.args.effectTimer, function() {
 				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
 					_this.fadeOutElement();
 				}
@@ -161,16 +189,10 @@
 			var i = this.calculateIndex();
 			var _this = this;
 			$(i).removeClass('active');
-			$(i).fadeOut(_this.args.carouselTimer, function() {
+			$(i).fadeOut(_this.args.effectTimer, function() {
 				_this.args.currElement++;
 				_this.fadeInElement();
 			});
-		},
-
-		clearCarouselTimer : function() {
-			clearTimeout(this.args.carouselTimeOut);
-			this.args.carouselTimeOut = null;
 		}
-
 	};
 })();
