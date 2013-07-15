@@ -182,7 +182,9 @@
 			$(i).addClass('active');
 			$(i).fadeIn(_this.args.effectTimer, function() {
 				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
-					_this.fadeOutElement();
+					_this.args.carouselTimeOut = setTimeout(function() {
+						_this.fadeOutElement();
+					}, _this.args.carouselTimer);
 				}
 			});
 		},
