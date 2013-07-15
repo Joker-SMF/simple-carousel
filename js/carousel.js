@@ -34,6 +34,7 @@
 
 		var defaults = {
 			ref : this,
+			carouselWidth: '70%',
 			carouselTimer : 2000,
 			effectTimer: 1000,
 			carouselTimeOut : null,
@@ -71,6 +72,7 @@
 				return false;
 			}
 
+			$(_this.args.ref).parent().css({'width': _this.args.carouselWidth});
 			_this.args.totalElements = parseInt(_this.args.ref.children().length) - 1;
 
 			$(_this.args.ref).parent().find('.arrowLeft').click(function() {
