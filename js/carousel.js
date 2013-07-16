@@ -63,7 +63,9 @@
 			var _this = this,
 				diffChild = false;
 
-			_this.args.childNodeName = $(_this.args.ref).children().get(0).tagName.toLowerCase()
+			_this.args.childNodeName = $(_this.args.ref).children().get(0).tagName.toLowerCase();
+			var i = this.calculateIndex();
+
 			$(_this.args.ref).children().each(function() {
 				if(_this.args.childNodeName !== this.tagName.toLowerCase()) diffChild = true
 			});
@@ -74,6 +76,10 @@
 
 			$(_this.args.ref).parent().css({'width': _this.args.carouselWidth});
 			_this.args.totalElements = parseInt(_this.args.ref.children().length) - 1;
+
+			_this.args.childWidth = $(i).width();
+			_this.args.childHeight = $(i).height();
+			_this.args.childMargin = _this.args.childHeight/2;
 
 			$(_this.args.ref).parent().find('.arrowLeft').click(function() {
 				_this.moveCarouselLeft();
@@ -144,9 +150,57 @@
 					});
 					break;
 
+				case 'flip':
+					_this.hideElements(function() {
+						$(_this.args.ref).find(_this.args.childNodeName).not(':first-child').css({
+							height:'0px',
+							width: _this.args.childWidth +'px',
+							marginTop: _this.args.childMargin +'px',
+							opacity:'0.5',
+							display: 'block'
+						});
+						_this.flipOutElements();
+					});
+					break;
+
 				default:
 					break;
 			}
+		},
+
+		flipOutElements: function() {
+			var _this = this,
+				i = this.calculateIndex();
+
+			$(i).animate({
+				height:'0px',
+				width: _this.args.childWidth +'px',
+				marginTop: _this.args.childMargin + 'px',
+				opacity:'0.5'
+			}, 500);
+
+			setTimeout(function() {
+				_this.args.currElement++;
+			 	_this.flipInElements();
+			},500);
+		},
+
+		flipInElements: function() {
+			var _this = this,
+				i = _this.calculateIndex();
+
+			$(i).stop().animate({
+				display: 'block',
+				height: _this.args.childHeight +'px',
+				width: _this.args.childWidth +'px',
+				marginTop:'0px',
+				opacity:'1',
+			},500, '', function() {
+				setTimeout(function(){
+					_this.flipOutElements();
+				}, 1000);
+				
+			});
 		},
 
 		slideInOut : function() {
