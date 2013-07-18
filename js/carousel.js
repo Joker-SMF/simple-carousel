@@ -53,6 +53,7 @@
 				currElement : 0,
 				stopCarousel: false,
 				childNodeName: null,
+				parentEle: null
 			};
 
 			this.args = $.extend({}, defaults, params);
@@ -64,6 +65,7 @@
 				diffChild = false;
 
 			_this.args.childNodeName = $(_this.args.ref).children().get(0).tagName.toLowerCase();
+			_this.args.parentEle = $(_this.args.ref).parent();
 			var i = this.calculateIndex();
 
 			$(_this.args.ref).children().each(function() {
@@ -94,18 +96,23 @@
 			}).bind('mouseleave', function() {
 				_this.resumeCarousel();
 			});
-			_this.chooseEffectFunction();
+			_this.addCounter();
 		},
 
-		pauseCarousel : function() {
-			this.args.stopCarousel = true;
-		},
-
-		resumeCarousel : function() {
-			this.args.stopCarousel = false;
-			if(this.args.automatic === true) {
-				if(this.args.effect === 'fade') this.fadeOutElement();
+		addCounter: function() {
+			var _this = this;
+			var counterLeft = $(_this.args.ref).offset().left + $(_this.args.ref).width()/2 - (_this.args.totalElements * 10);
+			var str = '';
+			for(var i = 0; i <= _this.args.totalElements; i++) {
+				str += '<span class="content_' + i + '"> ' + i + '</span>'
 			}
+			$('.buttons').html(str);
+
+			$('.counter').css({
+				'margin-left': counterLeft + 'px',
+				'width': (20 + _this.args.totalElements * 20) + 'px'
+			});
+			_this.chooseEffectFunction();
 		},
 
 		hideElements: function(callback) {
@@ -126,11 +133,6 @@
 		findActiveElement: function() {
 			var _this = this;
 			return $(_this.args.ref).find('.active');
-		},
-
-		clearCarouselTimer : function() {
-			clearTimeout(this.args.carouselTimeOut);
-			this.args.carouselTimeOut = null;
 		},
 
 		chooseEffectFunction : function() {
@@ -159,7 +161,7 @@
 							opacity:'0.5',
 							display: 'block'
 						});
-						_this.flipOutElements();
+						if(_this.args.automatic === true)  _this.flipOutElements();
 					});
 					break;
 
@@ -189,6 +191,7 @@
 			var _this = this,
 				i = _this.calculateIndex();
 
+			_this.changeIndicators();
 			$(i).stop().animate({
 				display: 'block',
 				height: _this.args.childHeight +'px',
@@ -217,6 +220,7 @@
 			}
 
 			if(_this.args.automatic === true) {
+				_this.changeIndicators();
 				$(i).addClass('active').show().css({
 	                left: $(i).width()
 	            }).animate({
@@ -231,8 +235,9 @@
 		},
 
 		fadeInElement : function(options) {
-			var i = this.calculateIndex();
-			var _this = this;
+			var i = this.calculateIndex(),
+				_this = this;
+
 			$(i).addClass('active');
 			$(i).fadeIn(_this.args.effectTimer, function() {
 				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
@@ -244,13 +249,36 @@
 		},
 
 		fadeOutElement: function() {
-			var i = this.calculateIndex();
-			var _this = this;
+			var i = this.calculateIndex(),
+				_this = this;
+
 			$(i).removeClass('active');
 			$(i).fadeOut(_this.args.effectTimer, function() {
 				_this.args.currElement++;
+				_this.changeIndicators();
 				_this.fadeInElement();
 			});
+		},
+
+		changeIndicators: function(callback) {
+			$('.buttons span').removeClass('highlighter');
+			$('.content_' + this.args.currElement).addClass('highlighter');
+		},
+
+		clearCarouselTimer : function() {
+			clearTimeout(this.args.carouselTimeOut);
+			this.args.carouselTimeOut = null;
+		},
+
+		pauseCarousel : function() {
+			this.args.stopCarousel = true;
+		},
+
+		resumeCarousel : function() {
+			this.args.stopCarousel = false;
+			if(this.args.automatic === true) {
+				if(this.args.effect === 'fade') this.fadeOutElement();
+			}
 		}
 	};
 })();
