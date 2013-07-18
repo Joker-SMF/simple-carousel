@@ -53,7 +53,8 @@
 				currElement : 0,
 				stopCarousel: false,
 				childNodeName: null,
-				parentEle: null
+				parentEle: null,
+				currFunc: null,
 			};
 
 			this.args = $.extend({}, defaults, params);
@@ -83,11 +84,11 @@
 			_this.args.childHeight = $(i).height();
 			_this.args.childMargin = _this.args.childHeight/2;
 
-			$(_this.args.ref).parent().find('.arrowLeft').click(function() {
+			$('.left_arrow').click(function() {
 				_this.moveCarouselLeft();
 			});
 
-			$(_this.args.ref).parent().find('.arrowRight').click(function() {
+			$('.right_arrow').click(function() {
 				_this.moveCarouselRight();
 			});
 
@@ -139,13 +140,17 @@
 			var _this = this;
 			switch(this.args.effect) {
 				case 'fade':
-					_this.hideElements(_this.fadeInElement.bind(_this));
+					_this.args.currFunc = 'fadeInElement';
+					_this.hideElements(function() {
+						if(_this.args.automatic === true)
+							_this.fadeInElement();
+					});
 					break;
 
 				case 'slide':
 					_this.args.currElement = 1;
 					_this.hideElements(function() {
-						if(_this.args.automatic === true) 
+						if(_this.args.automatic === true)
 							_this.args.carouselTimeOut = setTimeout(function() {
 								_this.slideInOut();
 							}, _this.args.carouselTimer);
@@ -240,11 +245,9 @@
 
 			$(i).addClass('active');
 			$(i).fadeIn(_this.args.effectTimer, function() {
-				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
-					_this.args.carouselTimeOut = setTimeout(function() {
-						_this.fadeOutElement();
-					}, _this.args.carouselTimer);
-				}
+				_this.args.carouselTimeOut = setTimeout(function() {
+					_this.fadeOutElement();
+				}, _this.args.carouselTimer);
 			});
 		},
 
@@ -256,7 +259,9 @@
 			$(i).fadeOut(_this.args.effectTimer, function() {
 				_this.args.currElement++;
 				_this.changeIndicators();
-				_this.fadeInElement();
+				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
+					_this.fadeInElement();
+				}
 			});
 		},
 
@@ -279,6 +284,14 @@
 			if(this.args.automatic === true) {
 				if(this.args.effect === 'fade') this.fadeOutElement();
 			}
-		}
+		},
+
+		moveCarouselLeft: function() {
+			this[this.args.currFunc]();
+		},
+
+		moveCarouselRight: function() {
+			this[this.args.currFunc]();
+		},
 	};
 })();
