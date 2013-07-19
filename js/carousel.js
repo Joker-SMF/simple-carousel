@@ -30,7 +30,7 @@
 (function() {
 	$.fn.carousel = function(args) {
 		args = args || {};
-		$this = this;
+		//$this = this;
 
 		var defaults = {
 			ref : this,
@@ -149,6 +149,7 @@
 
 				case 'slide':
 					_this.args.currElement = 1;
+					_this.args.currFunc = 'slideInOut';
 					_this.hideElements(function() {
 						if(_this.args.automatic === true) 
 							_this.args.carouselTimeOut = setTimeout(_this.slideInOut.bind(_this), _this.args.carouselTimer);
@@ -156,6 +157,7 @@
 					break;
 
 				case 'flip':
+					_this.args.currFunc = 'flipOutElements';
 					_this.hideElements(function() {
 						$(_this.args.ref).find(_this.args.childNodeName).not(':first-child').css({
 							height:'0px',
