@@ -144,9 +144,7 @@
 					_this.args.currElement = 1;
 					_this.hideElements(function() {
 						if(_this.args.automatic === true) 
-							_this.args.carouselTimeOut = setTimeout(function() {
-								_this.slideInOut();
-							}, _this.args.carouselTimer);
+							_this.args.carouselTimeOut = setTimeout(_this.slideInOut.bind(_this), _this.args.carouselTimer);
 					});
 					break;
 
@@ -159,7 +157,9 @@
 							opacity:'0.5',
 							display: 'block'
 						});
-						_this.flipOutElements();
+						if(_this.args.automatic === true) {
+							_this.flipOutElements();
+						}
 					});
 					break;
 
@@ -177,29 +177,27 @@
 				width: _this.args.childWidth +'px',
 				marginTop: _this.args.childMargin + 'px',
 				opacity:'0.5'
-			}, 500);
+			}, _this.args.effectTimer);
 
-			setTimeout(function() {
-				_this.args.currElement++;
-			 	_this.flipInElements();
-			},500);
+			_this.args.carouselTimeOut = setTimeout(_this.flipInElements.bind(_this), _this.args.carouselTimer);
 		},
 
 		flipInElements: function() {
+			this.args.currElement++;
+
 			var _this = this,
 				i = _this.calculateIndex();
 
-			$(i).stop().animate({
+			$(i).animate({
 				display: 'block',
 				height: _this.args.childHeight +'px',
 				width: _this.args.childWidth +'px',
 				marginTop:'0px',
 				opacity:'1',
-			},500, '', function() {
-				setTimeout(function(){
-					_this.flipOutElements();
-				}, 1000);
-				
+			},_this.args.effectTimer, '', function() {
+				if(_this.args.automatic === true) {
+					_this.args.carouselTimeOut = setTimeout(_this.flipOutElements.bind(_this), _this.args.carouselTimer);
+				}
 			});
 		},
 
@@ -222,10 +220,8 @@
 	            }).animate({
 	                left: 0
 	            }, _this.args.effectTimer, '', function() {
-		            _this.args.carouselTimeOut = setTimeout(function() {
-			            _this.args.currElement++;
-			            _this.slideInOut();
-		            }, _this.args.carouselTimer);
+	            	_this.args.currElement++;
+		            _this.args.carouselTimeOut = setTimeout(_this.slideInOut.bind(_this), _this.args.carouselTimer);
 	            });
 			}
 		},
@@ -236,9 +232,7 @@
 			$(i).addClass('active');
 			$(i).fadeIn(_this.args.effectTimer, function() {
 				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
-					_this.args.carouselTimeOut = setTimeout(function() {
-						_this.fadeOutElement();
-					}, _this.args.carouselTimer);
+					_this.args.carouselTimeOut = setTimeout(_this.fadeOutElement.bind(_this), _this.args.carouselTimer);
 				}
 			});
 		},
