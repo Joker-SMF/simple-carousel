@@ -111,7 +111,7 @@
 			var _this = this;
 			switch(this.args.effect) {
 				case 'fade':
-					_this.args.currFunc = 'fadeInElement';
+					_this.args.currFunc = 'fadeOutElement';
 					_this.hideElements(function() {
 						if(_this.args.automatic === true)
 							_this.fadeInElement();
@@ -185,17 +185,17 @@
 	            });
 			}
 
-			if(_this.args.automatic === true) {
-				_this.changeIndicators();
-				$(i).addClass('active').show().css({
-	                left: $(i).width()
-	            }).animate({
-	                left: 0
-	            }, _this.args.effectTimer, '', function() {
-	            	_this.args.currElement++;
+			_this.changeIndicators();
+			$(i).addClass('active').show().css({
+                left: $(i).width()
+            }).animate({
+                left: 0
+            }, _this.args.effectTimer, '', function() {
+	            _this.args.currElement++;
+	            if(_this.args.automatic === true && _this.args.stopCarousel === false) {
 		            _this.args.carouselTimeOut = setTimeout(_this.slideInOut.bind(_this), _this.args.carouselTimer);
-	            });
-			}
+		        }
+            });
 		},
 
 		flipOutElements: function() {
@@ -227,7 +227,7 @@
 				marginTop:'0px',
 				opacity:'1',
 			},_this.args.effectTimer, '', function() {
-				if(_this.args.automatic === true) {
+				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
 					_this.args.carouselTimeOut = setTimeout(_this.flipOutElements.bind(_this), _this.args.carouselTimer);
 				}
 			});
@@ -264,13 +264,14 @@
 		},
 
 		pauseCarousel : function() {
+			this.clearCarouselTimer();
 			this.args.stopCarousel = true;
 		},
 
 		resumeCarousel : function() {
 			this.args.stopCarousel = false;
 			if(this.args.automatic === true) {
-				if(this.args.effect === 'fade') this.fadeOutElement();
+				this[this.args.currFunc]();
 			}
 		},
 
