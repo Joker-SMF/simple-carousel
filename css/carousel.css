@@ -61,30 +61,36 @@
 	height: 100%;
 }
 
-.counter {
+.bottom_bar {
 	position: relative;
-	width: 20px;
 	overflow: hidden;
+	background: #DD571B;
+	padding: 4px 0;
+	color: #fff !important;
 }
 
 .left_arrow {
 	position: relative;
 	float: left;
-	padding-right: 10px;
+	padding-left: 5px;
+	width: 10px;
 }
 
 .buttons {
 	position: relative;
 	float: left;
-	padding-right: 10px;
+	padding: 0 10px;
+	display: inline-block;
 }
 
 .right_arrow {
 	position: relative;
-	float: left;
+	float: right;
+	padding-right: 5px;
+	width: 10px;
 }
 
 .highlighter {
-	color: #12c;
+	color: #DDD51B;
 	font-weight: bold;
 }

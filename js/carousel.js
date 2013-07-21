@@ -29,53 +29,41 @@
 
 (function() {
 	$.fn.carousel = function(args) {
-		args = args || {};
-		//$this = this;
-
 		var defaults = {
 			ref : this,
 			carouselWidth: '70%',
 			carouselTimer : 2000,
 			effectTimer: 1000,
-			carouselTimeOut : null,
 			automatic : false,
-			effect: 'slide'
+			effect: 'slide',
+			carouselTimeOut : null,
+			totalElements : null,
+			currElement : 0,
+			stopCarousel: false,
+			childNodeName: null,
+			parentEle: null,
+			currFunc: null
 		};
-		opts = $.extend({}, defaults, args);
-		return cBrain.init(opts);
+		return cBrain.init(defaults, args);
 	};
 
 	var cBrain = {
 		args : {},
-		init : function(params) {
-			var defaults = {
-				totalElements : null,
-				currElement : 0,
-				stopCarousel: false,
-				childNodeName: null,
-				parentEle: null,
-				currFunc: null,
-			};
+		init : function(defaults, opts) {
+			this.args = $.extend({}, defaults, opts);
 
-			this.args = $.extend({}, defaults, params);
-			this.makeInitialCheck();
-		},
-
-		makeInitialCheck: function() {
 			var _this = this,
-				diffChild = false;
+				childIssue = false;
 
 			_this.args.childNodeName = $(_this.args.ref).children().get(0).tagName.toLowerCase();
 			_this.args.parentEle = $(_this.args.ref).parent();
 			var i = this.calculateIndex();
 
 			$(_this.args.ref).children().each(function() {
-				if(_this.args.childNodeName !== this.tagName.toLowerCase()) diffChild = true
+				if(_this.args.childNodeName !== this.tagName.toLowerCase()) childIssue = true
 			});
 
-			if(diffChild === true) {
-				return false;
-			}
+			if(childIssue === true) return false;
 
 			$(_this.args.ref).parent().css({'width': _this.args.carouselWidth});
 			_this.args.totalElements = parseInt(_this.args.ref.children().length) - 1;
@@ -84,13 +72,15 @@
 			_this.args.childHeight = $(i).height();
 			_this.args.childMargin = _this.args.childHeight/2;
 
-			$('.left_arrow').click(function() {
-				_this.moveCarouselLeft();
-			});
+			if(_this.args.automatic === false) {
+				$('.left_arrow').click(function() {
+					_this.moveCarouselLeft();
+				});
 
-			$('.right_arrow').click(function() {
-				_this.moveCarouselRight();
-			});
+				$('.right_arrow').click(function() {
+					_this.moveCarouselRight();
+				});
+			}
 
 			$(_this.args.ref).bind('mouseenter', function() {
 				_this.pauseCarousel();
@@ -109,31 +99,12 @@
 			}
 			$('.buttons').html(str);
 
-			$('.counter').css({
+			var buttonsWidth = $('.buttons').width();
+			$('.bottom_bar').css({
 				'margin-left': counterLeft + 'px',
-				'width': (20 + _this.args.totalElements * 20) + 'px'
+				'width': parseInt(buttonsWidth + 50) + 'px'
 			});
 			_this.chooseEffectFunction();
-		},
-
-		hideElements: function(callback) {
-			var _this = this;
-			$(_this.args.ref).find(_this.args.childNodeName).not(':first-child').hide();
-			$(_this.args.ref).find(_this.args.childNodeName + ':first').addClass('active');
-			callback();
-		},
-
-		calculateIndex : function (index) {
-			var _this = this;
-			if(_this.args.currElement > _this.args.totalElements) {
-				_this.args.currElement = 0;
-			}
-			return $(_this.args.ref).find(_this.args.childNodeName).eq(_this.args.currElement);
-		},
-
-		findActiveElement: function() {
-			var _this = this;
-			return $(_this.args.ref).find('.active');
 		},
 
 		chooseEffectFunction : function() {
@@ -151,7 +122,7 @@
 					_this.args.currElement = 1;
 					_this.args.currFunc = 'slideInOut';
 					_this.hideElements(function() {
-						if(_this.args.automatic === true) 
+						if(_this.args.automatic === true)
 							_this.args.carouselTimeOut = setTimeout(_this.slideInOut.bind(_this), _this.args.carouselTimer);
 					});
 					break;
@@ -174,6 +145,56 @@
 
 				default:
 					break;
+			}
+		},
+
+		fadeInElement : function(options) {
+			var i = this.calculateIndex(),
+				_this = this;
+
+			$(i).addClass('active');
+			$(i).fadeIn(_this.args.effectTimer, function() {
+				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
+					_this.args.carouselTimeOut = setTimeout(_this.fadeOutElement.bind(_this), _this.args.carouselTimer);
+				}
+			});
+		},
+
+		fadeOutElement: function() {
+			var i = this.calculateIndex(),
+				_this = this;
+
+			$(i).removeClass('active');
+			$(i).fadeOut(_this.args.effectTimer, function() {
+				_this.args.currElement++;
+				_this.changeIndicators();
+				_this.fadeInElement();
+			});
+		},
+
+		slideInOut : function() {
+			var _this = this,
+				i = this.calculateIndex(),
+				active_ele = this.findActiveElement();
+
+			if(active_ele.length > 0) {
+				$(active_ele).animate({
+	                left: -($(active_ele).width())
+	            }, _this.args.effectTimer, '', function(){
+	                $(active_ele).removeClass('active');
+	            });
+			}
+
+			if(_this.args.automatic === true) {
+				_this.changeIndicators();
+				$(i).addClass('active').show().css({
+	                left: $(i).width()
+	            }).animate({
+	                left: 0
+	            }, _this.args.effectTimer, '', function() {
+	            	_this.args.currElement++;
+		            _this.args.carouselTimeOut = setTimeout(_this.slideInOut.bind(_this), _this.args.carouselTimer);
+	            });
 			}
 		},
 
@@ -212,56 +233,24 @@
 			});
 		},
 
-		slideInOut : function() {
-			var _this = this,
-				i = this.calculateIndex(),
-				active_ele = this.findActiveElement();
-
-			if(active_ele.length > 0) {
-				$(active_ele).animate({
-	                left: -($(active_ele).width())
-	            }, _this.args.effectTimer, '', function(){
-	                $(active_ele).removeClass('active');
-	            });
-			}
-
-			if(_this.args.automatic === true) {
-				_this.changeIndicators();
-				$(i).addClass('active').show().css({
-	                left: $(i).width()
-	            }).animate({
-	                left: 0
-	            }, _this.args.effectTimer, '', function() {
-	            	_this.args.currElement++;
-		            _this.args.carouselTimeOut = setTimeout(_this.slideInOut.bind(_this), _this.args.carouselTimer);
-	            });
-			}
+		hideElements: function(callback) {
+			var _this = this;
+			$(_this.args.ref).find(_this.args.childNodeName).not(':first-child').hide();
+			$(_this.args.ref).find(_this.args.childNodeName + ':first').addClass('active');
+			callback();
 		},
 
-		fadeInElement : function(options) {
-			var i = this.calculateIndex(),
-				_this = this;
-
-			$(i).addClass('active');
-			$(i).fadeIn(_this.args.effectTimer, function() {
-				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
-					_this.args.carouselTimeOut = setTimeout(_this.fadeOutElement.bind(_this), _this.args.carouselTimer);
-				}
-			});
+		calculateIndex : function (index) {
+			var _this = this;
+			if(_this.args.currElement > _this.args.totalElements) {
+				_this.args.currElement = 0;
+			}
+			return $(_this.args.ref).find(_this.args.childNodeName).eq(_this.args.currElement);
 		},
 
-		fadeOutElement: function() {
-			var i = this.calculateIndex(),
-				_this = this;
-
-			$(i).removeClass('active');
-			$(i).fadeOut(_this.args.effectTimer, function() {
-				_this.args.currElement++;
-				_this.changeIndicators();
-				if(_this.args.automatic === true && _this.args.stopCarousel === false) {
-					_this.fadeInElement();
-				}
-			});
+		findActiveElement: function() {
+			var _this = this;
+			return $(_this.args.ref).find('.active');
 		},
 
 		changeIndicators: function(callback) {
