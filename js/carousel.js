@@ -91,19 +91,28 @@
 		},
 
 		addCounter: function() {
-			var _this = this;
-			var counterLeft = $(_this.args.ref).offset().left + $(_this.args.ref).width()/2 - (_this.args.totalElements * 10);
-			var str = '';
+			var _this = this,
+				str = '';
 			for(var i = 0; i <= _this.args.totalElements; i++) {
 				str += '<span class="content_' + i + '"> ' + i + '</span>'
 			}
 			$('.buttons').html(str);
 
-			var buttonsWidth = $('.buttons').width();
+			var buttonsWidth = parseInt($('.buttons').width()) + 50,
+				buttonsLeft = $(_this.args.ref).offset().left + $(_this.args.ref).width()/2 - buttonsWidth/2;
+
 			$('.bottom_bar').css({
-				'margin-left': counterLeft + 'px',
-				'width': parseInt(buttonsWidth + 50) + 'px'
+				'margin-left': buttonsLeft + 'px',
+				'width': buttonsWidth + 'px'
 			});
+			if(_this.args.automatic === true) {
+				$('.right_arrow').css({
+					'color' : '#232323'
+				});
+				$('.left_arrow').css({
+					'color' : '#232323'
+				})
+			}
 			_this.chooseEffectFunction();
 		},
 

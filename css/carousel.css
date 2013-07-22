@@ -64,9 +64,9 @@
 .bottom_bar {
 	position: relative;
 	overflow: hidden;
-	background: #DD571B;
+	background: #2ac150;
 	padding: 4px 0;
-	color: #fff !important;
+	color: #fff;
 }
 
 .left_arrow {
@@ -91,6 +91,6 @@
 }
 
 .highlighter {
-	color: #DDD51B;
+	color: #DD571B;
 	font-weight: bold;
 }
